@@ -1,10 +1,10 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: nest-postgres
+    container_name: ${COMPOSE_PROJECT_NAME}-postgres
     restart: unless-stopped
     environment:
-      # 这里使用 .env 中的配置，便于统一修改数据库账号与库名。
+      # 这里使用当前环境文件中的配置，便于开发与生产环境分离。
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}

@@ -1,17 +1,18 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleDestroy {
-  constructor() {
-    const connectionString = process.env.DATABASE_URL;
+  constructor(private readonly configService: ConfigService) {
+    const connectionString = configService.get<string>('database.url');
 
     if (!connectionString) {
-      throw new Error('未找到 DATABASE_URL，请检查 .env 配置。');
+      throw new Error('未找到 DATABASE_URL，请检查当前环境文件配置。');
     }
 
-    // Prisma 7 需要通过 PostgreSQL 驱动适配器来创建客户端实例。
+    // Prisma 7 通过 PostgreSQL 驱动适配器连接不同环境下的数据库。
     const adapter = new PrismaPg({
       connectionString,
     });
