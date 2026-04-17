@@ -14,9 +14,7 @@ async function bootstrap() {
   await app.listen(port);
 
   bootstrapLogger.log(`Application is running at ${await app.getUrl()}`);
-  bootstrapLogger.log(
-    `Current environment: ${configService.get<string>('app.nodeEnv')}`,
-  );
+  bootstrapLogger.log(`Current environment: ${configService.get<string>('app.nodeEnv')}`);
 
   process.on('unhandledRejection', (reason) => {
     bootstrapLogger.error(`Unhandled Rejection: ${String(reason)}`);

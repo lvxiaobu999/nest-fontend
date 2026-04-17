@@ -1,0 +1,6 @@
+dist
+logs
+coverage
+node_modules
+.env
+.env.*

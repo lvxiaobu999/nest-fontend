@@ -23,8 +23,7 @@ import { createWinstonLogger } from './common/logger/winston.logger';
     /* 构建日志 */
     WinstonModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) =>
-        createWinstonLogger(configService),
+      useFactory: (configService: ConfigService) => createWinstonLogger(configService),
     }),
     PrismaModule,
     UsersModule,

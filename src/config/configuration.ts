@@ -15,9 +15,7 @@ export default () => ({
     url: process.env.DATABASE_URL ?? '',
   },
   logging: {
-    level:
-      process.env.LOG_LEVEL ||
-      (getAppEnvironment() === 'production' ? 'warn' : 'debug'),
+    level: process.env.LOG_LEVEL || (getAppEnvironment() === 'production' ? 'warn' : 'debug'),
     slowRequestThreshold: toNumber(process.env.SLOW_REQUEST_THRESHOLD, 1000),
   },
 });

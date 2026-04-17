@@ -21,8 +21,7 @@ function getRequiredPort(config: EnvRecord, key: string): number {
 }
 
 export function validateEnv(config: EnvRecord) {
-  const nodeEnv =
-    typeof config.NODE_ENV === 'string' ? config.NODE_ENV : 'development';
+  const nodeEnv = typeof config.NODE_ENV === 'string' ? config.NODE_ENV : 'development';
 
   if (!['development', 'production'].includes(nodeEnv)) {
     throw new Error('NODE_ENV 只允许是 development 或 production。');
