@@ -1,10 +1,4 @@
-import {
-  ExceptionFilter,
-  Catch,
-  ArgumentsHost,
-  HttpException,
-  Logger,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { getRequestId, getTraceId } from '../context/request-context';
 
@@ -36,19 +30,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     // ⭐ 关键：带 requestId + stack
-    this.logger.error(
-      `${method} ${url} ${status} - ${message}`,
-      stack,
-      requestId,
-    );
+    this.logger.error(`${method} ${url} ${status} - ${message}`, stack, requestId);
 
     response.status(status).json({
-      statusCode: status,
+      success: false,
+      code: status,
       message,
-      traceId,
-      requestId, // 返回给前端方便排查
-      timestamp: new Date().toISOString(),
-      path: url,
+      error: {
+        statusCode: status,
+        path: url,
+      },
+      meta: {
+        requestId,
+        traceId,
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 }

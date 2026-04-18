@@ -11,6 +11,7 @@ import { WinstonModule } from 'nest-winston';
 import { createWinstonLogger } from './common/logger/winston.logger';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpLoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
@@ -34,6 +35,10 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseInterceptor,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: HttpLoggingInterceptor,
