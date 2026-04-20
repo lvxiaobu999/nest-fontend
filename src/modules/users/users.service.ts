@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -12,12 +12,12 @@ export class UsersService {
   async findAll(): Promise<User[]> {
     return this.prismaService.user.findMany({
       orderBy: {
-        id: 'asc',
+        createTime: 'desc',
       },
     });
   }
 
-  async findOne(id: number): Promise<User | null> {
+  async findOne(id: string): Promise<User | null> {
     return this.prismaService.user.findUnique({
       where: { id },
     });
@@ -27,23 +27,33 @@ export class UsersService {
     console.log('创建用户:', createUserDto);
     return this.prismaService.user.create({
       data: {
-        email: createUserDto.email,
-        name: createUserDto.username ?? null,
+        username: createUserDto.username,
+        password: createUserDto.password,
+        nickname: createUserDto.nickname,
+        roleId: createUserDto.roleId,
+        isSuperAdmin: createUserDto.isSuperAdmin ?? 0,
+        enabled: createUserDto.enabled ?? 1,
+        remark: createUserDto.remark,
       },
     });
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     return this.prismaService.user.update({
       where: { id },
       data: {
-        email: updateUserDto.email,
-        name: updateUserDto.username,
+        username: updateUserDto.username,
+        password: updateUserDto.password,
+        nickname: updateUserDto.nickname,
+        roleId: updateUserDto.roleId,
+        isSuperAdmin: updateUserDto.isSuperAdmin,
+        enabled: updateUserDto.enabled,
+        remark: updateUserDto.remark,
       },
     });
   }
 
-  async remove(id: number): Promise<User> {
+  async remove(id: string): Promise<User> {
     return this.prismaService.user.delete({
       where: { id },
     });

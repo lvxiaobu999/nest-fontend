@@ -1,4 +1,4 @@
-import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
@@ -10,11 +10,11 @@ async function bootstrap() {
   app.enableCors();
   // 设置全局路由前缀为 /api，这样所有接口都以 /api 开头，便于区分和管理。
   app.setGlobalPrefix('api');
-  // 启用 URI 版本控制，默认版本为 1，这样接口可以通过 /api/v1/users 访问。
-  app.enableVersioning({
-    type: VersioningType.URI,
-    defaultVersion: '1', // 可选：设置全局默认版本
-  });
+  // // 启用 URI 版本控制，默认版本为 1，这样接口可以通过 /api/v1/users 访问。
+  // app.enableVersioning({
+  //   type: VersioningType.URI,
+  //   defaultVersion: '1', // 可选：设置全局默认版本
+  // });
 
   const configService = app.get(ConfigService);
   const bootstrapLogger = new Logger('Bootstrap');
