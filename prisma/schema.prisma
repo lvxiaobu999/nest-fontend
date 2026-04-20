@@ -6,10 +6,75 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Permission {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  code       String   @unique
+  remark     String?
+  enabled    Int      @default(1)
+  menuId     String?
+  menu       Menu?    @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  roles      Role[]
+  createTime DateTime @default(now())
+  updateTime DateTime @updatedAt
+
+  @@index([menuId])
+  @@map("permissions")
 }
+
+model Menu {
+  id         String       @id @default(uuid())
+  // Root menus should keep parentId as null to avoid self-relation FK errors.
+  parentId   String?
+  path       String
+  title      String
+  icon       String?
+  order      Int?         @default(0)
+  keepAlive  Boolean?     @default(false)
+  hidden     Boolean?     @default(false)
+  isLogin    Boolean?     @default(true)
+  disabled   Boolean?     @default(false)
+  enabled    Int          @default(1)
+  children   Menu[]       @relation("MenuToMenu")
+  parent     Menu?        @relation("MenuToMenu", fields: [parentId], references: [id], onDelete: Cascade)
+  permissions Permission[]
+  roles      Role[]
+  createTime DateTime     @default(now())
+  updateTime DateTime     @updatedAt
+
+  @@index([parentId])
+  @@map("menus")
+}
+
+model Role {
+  id           String       @id @default(uuid())
+  name         String       @unique
+  code         String       @unique
+  desc         String?
+  enabled      Int          @default(1)
+  users        User[]
+  menus        Menu[]
+  permissions  Permission[]
+  createTime   DateTime     @default(now())
+  updateTime   DateTime     @updatedAt
+
+  @@map("roles")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  password     String
+  isSuperAdmin Int      @default(0)
+  roleId       String?
+  role         Role?    @relation(fields: [roleId], references: [id], onDelete: SetNull)
+  nickname     String
+  enabled      Int      @default(1)
+  remark       String?
+  createTime   DateTime @default(now())
+  updateTime   DateTime @updatedAt
+
+  @@index([roleId])
+  @@map("users")
+}
+
