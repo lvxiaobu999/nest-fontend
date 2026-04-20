@@ -22,6 +22,7 @@ export class UsersController {
   // 创建用户，演示 Prisma create 的基本用法。
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
+    console.log('wo diu');
     return this.usersService.create(createUserDto);
   }
 

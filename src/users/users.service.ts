@@ -24,10 +24,11 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
+    console.log('创建用户:', createUserDto);
     return this.prismaService.user.create({
       data: {
         email: createUserDto.email,
-        name: createUserDto.name ?? null,
+        name: createUserDto.username ?? null,
       },
     });
   }
@@ -37,7 +38,7 @@ export class UsersService {
       where: { id },
       data: {
         email: updateUserDto.email,
-        name: updateUserDto.name,
+        name: updateUserDto.username,
       },
     });
   }
