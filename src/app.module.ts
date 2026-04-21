@@ -16,6 +16,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { MenusModule } from './modules/menus/menus.module';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { AuthModule } from './modules/auth/auth.module';
 @Module({
   imports: [
     // 根据 NODE_ENV 自动加载开发环境或生产环境配置，并做基础校验。
@@ -35,6 +36,7 @@ import { PrismaModule } from './prisma/prisma.module';
     DashboardModule,
     UsersModule,
     MenusModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [

@@ -1,8 +1,11 @@
+import bcrypt from 'bcrypt';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 import { loadEnv } from './load-env.mjs';
 
 loadEnv();
+
+const PASSWORD_SALT_ROUNDS = 10;
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
@@ -15,18 +18,20 @@ function toDateOnly(date) {
 }
 
 async function main() {
+  const demoAdminPassword = await bcrypt.hash('123456', PASSWORD_SALT_ROUNDS);
+
   await prisma.user.upsert({
     where: { username: 'demo-admin' },
     update: {
       nickname: '演示管理员',
-      password: '123456',
+      password: demoAdminPassword,
       isSuperAdmin: 1,
       enabled: 1,
       remark: '用于本地联调的初始化账号',
     },
     create: {
       username: 'demo-admin',
-      password: '123456',
+      password: demoAdminPassword,
       nickname: '演示管理员',
       isSuperAdmin: 1,
       enabled: 1,
