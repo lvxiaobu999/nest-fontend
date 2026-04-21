@@ -19,10 +19,39 @@ export class AllExceptionsFilter implements ExceptionFilter {
     let status = 500;
     let message = 'Internal server error';
     let stack: string | undefined;
+    let details: unknown;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      message = exception.message;
+      const exceptionResponse = exception.getResponse();
+
+      if (typeof exceptionResponse === 'string') {
+        message = exceptionResponse;
+      } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+        const responseBody = exceptionResponse as {
+          message?: string | string[];
+          error?: string;
+          errors?: unknown;
+        };
+
+        if (typeof responseBody.message === 'string') {
+          message = responseBody.message;
+        } else if (Array.isArray(responseBody.message) && responseBody.message.length > 0) {
+          message = responseBody.message.join('; ');
+          details = responseBody.message;
+        } else if (typeof responseBody.error === 'string') {
+          message = responseBody.error;
+        } else {
+          message = exception.message;
+        }
+
+        if (responseBody.errors !== undefined) {
+          details = responseBody.errors;
+        }
+      } else {
+        message = exception.message;
+      }
+
       stack = exception.stack;
     } else if (exception instanceof Error) {
       message = exception.message;
@@ -39,6 +68,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       error: {
         statusCode: status,
         path: url,
+        details,
       },
       meta: {
         requestId,

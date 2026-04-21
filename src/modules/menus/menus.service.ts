@@ -25,13 +25,14 @@ export class MenusService {
     return this.prismaService.menu.create({
       data: {
         title: createMenuDto.title,
-        path: createMenuDto.path,
+        path: createMenuDto.path || '',
         icon: createMenuDto.icon,
         order: createMenuDto.order,
         keepAlive: createMenuDto.keepAlive,
         hidden: createMenuDto.hidden,
         isLogin: createMenuDto.isLogin,
         disabled: createMenuDto.disabled,
+        enabled: createMenuDto.enabled ?? 1,
         parentId: createMenuDto.parentId,
       },
     });
@@ -49,6 +50,7 @@ export class MenusService {
         hidden: updateMenuDto.hidden,
         isLogin: updateMenuDto.isLogin,
         disabled: updateMenuDto.disabled,
+        enabled: updateMenuDto.enabled,
         parentId: updateMenuDto.parentId,
       },
     });

@@ -1,8 +1,9 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { BadRequestException, Logger, ValidationError, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 import { AppModule } from './app.module';
+import { flattenValidationErrors } from './common/utils/validation.util';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -29,6 +30,11 @@ async function bootstrap() {
       transformOptions: {
         enableImplicitConversion: true, // 启用隐式转换
       },
+      exceptionFactory: (errors: ValidationError[]) =>
+        new BadRequestException({
+          message: 'Request validation failed',
+          errors: flattenValidationErrors(errors),
+        }),
     }),
   );
 
