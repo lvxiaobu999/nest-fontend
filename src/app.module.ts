@@ -12,6 +12,7 @@ import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import configuration from './config/configuration';
 import { getEnvFilePaths } from './config/env.util';
 import { validateEnv } from './config/env.validation';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { MenusModule } from './modules/menus/menus.module';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -31,6 +32,7 @@ import { PrismaModule } from './prisma/prisma.module';
       useFactory: (configService: ConfigService) => createWinstonLogger(configService),
     }),
     PrismaModule,
+    DashboardModule,
     UsersModule,
     MenusModule,
   ],

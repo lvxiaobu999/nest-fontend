@@ -78,3 +78,56 @@ model User {
   @@map("users")
 }
 
+model DashboardCoreMetric {
+  id                String   @id @default(uuid())
+  metricDate        DateTime @unique @db.Date
+  todayVisits       Int      @default(0)
+  blockedCount      Int      @default(0)
+  payUsers          Int      @default(0)
+  payOrders         Int      @default(0)
+  totalVisits       Int      @default(0)
+  payConversionRate Decimal  @default(0) @db.Decimal(5, 2)
+  createTime        DateTime @default(now())
+  updateTime        DateTime @updatedAt
+
+  @@map("dashboard_core_metrics")
+}
+
+model DashboardDomain {
+  id         String                @id @default(uuid())
+  name       String                @unique
+  enabled    Int                   @default(1)
+  stats      DashboardDomainStat[]
+  createTime DateTime              @default(now())
+  updateTime DateTime              @updatedAt
+
+  @@map("dashboard_domains")
+}
+
+model DashboardDomainStat {
+  id         String          @id @default(uuid())
+  domainId   String
+  statDate   DateTime        @db.Date
+  visits     Int             @default(0)
+  payments   Int             @default(0)
+  domain     DashboardDomain @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  createTime DateTime        @default(now())
+  updateTime DateTime        @updatedAt
+
+  @@unique([domainId, statDate])
+  @@index([domainId, statDate])
+  @@index([statDate])
+  @@map("dashboard_domain_stats")
+}
+
+model DashboardSystemSnapshot {
+  id           String   @id @default(uuid())
+  reportTime   DateTime @default(now())
+  serverStatus String
+  alertCount   Int      @default(0)
+  createTime   DateTime @default(now())
+  updateTime   DateTime @updatedAt
+
+  @@index([reportTime])
+  @@map("dashboard_system_snapshots")
+}
