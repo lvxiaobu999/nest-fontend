@@ -20,6 +20,22 @@ function getRequiredPort(config: EnvRecord, key: string): number {
   return value;
 }
 
+function getOptionalNumber(config: EnvRecord, key: string, fallback: number): number {
+  const rawValue = config[key];
+
+  if (rawValue === undefined || rawValue === null || rawValue === '') {
+    return fallback;
+  }
+
+  const value = Number(rawValue);
+
+  if (!Number.isInteger(value) || value < 0) {
+    throw new Error(`环境变量 ${key} 必须是大于等于 0 的整数。`);
+  }
+
+  return value;
+}
+
 export function validateEnv(config: EnvRecord) {
   const nodeEnv = typeof config.NODE_ENV === 'string' ? config.NODE_ENV : 'development';
 
@@ -38,6 +54,11 @@ export function validateEnv(config: EnvRecord) {
     POSTGRES_PASSWORD: getRequiredString(config, 'POSTGRES_PASSWORD'),
     POSTGRES_DB: getRequiredString(config, 'POSTGRES_DB'),
     DATABASE_URL: getRequiredString(config, 'DATABASE_URL'),
+    REDIS_HOST: getRequiredString(config, 'REDIS_HOST'),
+    REDIS_PORT: getRequiredPort(config, 'REDIS_PORT'),
+    REDIS_DB: getOptionalNumber(config, 'REDIS_DB', 0),
+    JWT_SECRET: getRequiredString(config, 'JWT_SECRET'),
+    JWT_EXPIRES_IN: getRequiredString(config, 'JWT_EXPIRES_IN'),
     LOG_LEVEL: getRequiredString(config, 'LOG_LEVEL'), // 日志级别
   };
 }

@@ -12,12 +12,12 @@ import { requestIdMiddleware } from './common/middleware/request-id.middleware';
 import configuration from './config/configuration';
 import { getEnvFilePaths } from './config/env.util';
 import { validateEnv } from './config/env.validation';
+import { AuthModule } from './modules/auth/auth.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { MenusModule } from './modules/menus/menus.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { UsersModule } from './modules/users/users.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './modules/auth/auth.module';
 @Module({
   imports: [
     // 根据 NODE_ENV 自动加载开发环境或生产环境配置，并做基础校验。

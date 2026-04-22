@@ -1,6 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { getRequestId, getTraceId } from '../context/request-context';
+import { BusinessException } from '../exceptions/business.exception';
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
@@ -32,6 +33,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           message?: string | string[];
           error?: string;
           errors?: unknown;
+          details?: unknown;
         };
 
         if (typeof responseBody.message === 'string') {
@@ -47,12 +49,34 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
         if (responseBody.errors !== undefined) {
           details = responseBody.errors;
+        } else if (responseBody.details !== undefined) {
+          details = responseBody.details;
         }
       } else {
         message = exception.message;
       }
 
       stack = exception.stack;
+
+      if (exception instanceof BusinessException) {
+        response.status(status).json({
+          success: false,
+          code: exception.getBusinessCode(),
+          message,
+          data: null,
+          error: {
+            statusCode: status,
+            path: url,
+            details,
+          },
+          meta: {
+            requestId,
+            traceId,
+            timestamp: new Date().toISOString(),
+          },
+        });
+        return;
+      }
     } else if (exception instanceof Error) {
       message = exception.message;
       stack = exception.stack;
