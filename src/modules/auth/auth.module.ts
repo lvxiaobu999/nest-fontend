@@ -1,17 +1,17 @@
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { JwtAuthGuard } from '../../common/gurads/jwt-auth.guard';
 import { UsersModule } from '../users/users.module';
 import { AuthSessionService } from './auth-session.service';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { parseJwtExpiresInToSeconds } from './utils/jwt-expiration.util';
 
-// 认证模块统一负责登录、JWT 签发、Redis 会话管理和注销逻辑。
 @Module({
   imports: [
     UsersModule,
@@ -41,6 +41,14 @@ import { parseJwtExpiresInToSeconds } from './utils/jwt-expiration.util';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthSessionService, JwtStrategy, JwtAuthGuard],
+  providers: [
+    AuthService,
+    AuthSessionService,
+    JwtStrategy,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+  ],
 })
 export class AuthModule {}
