@@ -3,6 +3,7 @@ import { Prisma, User } from '@prisma/client';
 import { hashPassword, verifyPassword } from '../../common/utils/password.util';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { QueryUsersDto } from './dto/query-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 const userPublicSelect = Prisma.validator<Prisma.UserSelect>()({
@@ -17,23 +18,61 @@ const userPublicSelect = Prisma.validator<Prisma.UserSelect>()({
   updateTime: true,
 });
 
+const userListSelect = Prisma.validator<Prisma.UserSelect>()({
+  ...userPublicSelect,
+  role: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+});
+
 export type SafeUser = Prisma.UserGetPayload<{ select: typeof userPublicSelect }>;
+export type UserListItem = Prisma.UserGetPayload<{ select: typeof userListSelect }>;
+
+export interface PaginatedUsersResponse {
+  list: UserListItem[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}
 
 @Injectable()
 export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  // 查询用户列表时主动排除 password，避免哈希值通过接口泄露。
-  async findAll(): Promise<SafeUser[]> {
-    return this.prismaService.user.findMany({
-      select: userPublicSelect,
-      orderBy: {
-        createTime: 'desc',
+  async findAll(query: QueryUsersDto): Promise<PaginatedUsersResponse> {
+    const page = query.page ?? 1;
+    const pageSize = query.pageSize ?? 10;
+    const skip = (page - 1) * pageSize;
+
+    const [total, list] = await Promise.all([
+      this.prismaService.user.count(),
+      this.prismaService.user.findMany({
+        skip,
+        take: pageSize,
+        select: userListSelect,
+        orderBy: {
+          createTime: 'desc',
+        },
+      }),
+    ]);
+
+    return {
+      list,
+      pagination: {
+        page,
+        pageSize,
+        total,
+        totalPages: total === 0 ? 0 : Math.ceil(total / pageSize),
       },
-    });
+    };
   }
 
-  // 单个用户查询同样只返回脱敏后的安全字段。
   async findOne(id: string): Promise<SafeUser | null> {
     return this.prismaService.user.findUnique({
       where: { id },
@@ -41,7 +80,6 @@ export class UsersService {
     });
   }
 
-  // 登录校验单独保留一条链路，这里会读取 password 做比对，但最终不会把它返回出去。
   async validateLogin(username: string, password: string): Promise<SafeUser | null> {
     const user = await this.prismaService.user.findUnique({
       where: { username },
@@ -51,7 +89,6 @@ export class UsersService {
       return null;
     }
 
-    // 只允许启用状态的用户登录，密码用 bcrypt.compare 校验。
     const isPasswordValid = await verifyPassword(password, user.password);
 
     if (!isPasswordValid) {
@@ -61,7 +98,6 @@ export class UsersService {
     return this.toSafeUser(user);
   }
 
-  // 创建用户时统一做密码哈希，数据库中不再保存明文密码。
   async create(createUserDto: CreateUserDto): Promise<SafeUser> {
     return this.prismaService.user.create({
       select: userPublicSelect,
@@ -77,7 +113,6 @@ export class UsersService {
     });
   }
 
-  // 更新用户时只有显式传入了新密码，才会重新做哈希并覆盖旧密码。
   async update(id: string, updateUserDto: UpdateUserDto): Promise<SafeUser> {
     const data: Prisma.UserUncheckedUpdateInput = {
       username: updateUserDto.username,
@@ -99,7 +134,6 @@ export class UsersService {
     });
   }
 
-  // 删除接口也保持统一的脱敏返回格式。
   async remove(id: string): Promise<SafeUser> {
     return this.prismaService.user.delete({
       where: { id },
@@ -107,7 +141,6 @@ export class UsersService {
     });
   }
 
-  // 将 Prisma 的完整 User 实体映射成安全的对外返回对象。
   private toSafeUser(user: User): SafeUser {
     return {
       id: user.id,
